@@ -1,7 +1,9 @@
 package com.dictionaryapp.controller;
 
 import com.dictionaryapp.model.dto.AddWordDTO;
+import com.dictionaryapp.service.WordsService;
 import jakarta.validation.Valid;
+import jdk.internal.icu.text.UnicodeSet;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +14,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class WordController {
 
 
+    private WordsService wordsService;
+
+    public WordController(WordsService wordsService) {
+        this.wordsService = wordsService;
+    }
+
     @GetMapping("/words")
     public String viewAddWord() {
         return "word-add";
@@ -21,6 +29,14 @@ public class WordController {
     public String doAddWord(@Valid AddWordDTO data,
                             BindingResult bindingResult,
                             RedirectAttributes redirectAttributes) {
-        return "redirect:/word-add";
+        if (bindingResult.hasErrors()){
+            redirectAttributes.addFlashAttribute("addWordData",data);
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.addWordData",bindingResult);
+
+            return "redirect:/words";
+        }
+
+        wordsService.add(data);
+        return "redirect:/home";
     }
 }
